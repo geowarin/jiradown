@@ -97,7 +97,9 @@ export type Inline =
   | Link
   | Anchor
   | Image
-  | Mention;
+  | Mention
+  | Checkbox
+  | StatusIcon;
 
 export interface Text {
   type: "Text";
@@ -176,6 +178,16 @@ export interface Image {
 export interface Mention {
   type: "Mention";
   id: string;
+}
+
+export interface Checkbox {
+  type: "Checkbox";
+  checked: boolean;
+}
+
+export interface StatusIcon {
+  type: "StatusIcon";
+  icon: string; // e.g. "(/)", "(x)", "(!)", "(i)", "(y)", "(n)"
 }
 
 export function doc(children: Block[] = []): Document {

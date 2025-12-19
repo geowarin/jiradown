@@ -10,7 +10,10 @@ import type {
   TableRow,
 } from "./ast";
 import { doc } from "./ast";
-import { parseInline } from "./inline";
+import {
+  PIPE_CONTAINING_INLINES,
+  parseInline,
+} from "./inline";
 import { Scanner } from "./scanner";
 
 const PATTERNS = {
@@ -295,7 +298,6 @@ function parseTable(scanner: Scanner): Table {
     }
 
     while (remaining.length > 0) {
-      remaining = remaining.trimStart();
       if (remaining.startsWith("||")) {
         remaining = remaining.slice(2);
         const endIdx = findCellEnd(remaining);
@@ -309,7 +311,11 @@ function parseTable(scanner: Scanner): Table {
         addTableCell(cells, content, false);
         remaining = remaining.slice(endIdx);
       } else {
-        break;
+        // If it doesn't start with | or ||, but there is still content,
+        // it might be some leading whitespace or tabs.
+        const nextSeparator = remaining.search(/\|/);
+        if (nextSeparator === -1) break;
+        remaining = remaining.slice(nextSeparator);
       }
     }
 
@@ -358,10 +364,20 @@ function addTableCell(cells: TableCell[], content: string, header: boolean) {
 function findCellEnd(text: string): number {
   const scanner = new Scanner(text);
   while (scanner.hasMore()) {
-    if (scanner.peek(2) === "||" || scanner.peek(1) === "|") {
+    const char = scanner.peek();
+
+    if (char === "|" || (char === "|" && scanner.peek(2) === "||")) {
       return scanner.pos;
     }
 
+    // Skip constructs that might contain pipe characters but are not cell separators.
+    const inlineMatch = scanner.matchAny(PIPE_CONTAINING_INLINES);
+    if (inlineMatch) {
+      scanner.pos += inlineMatch[0].length;
+      continue;
+    }
+
+    // Handle nested tables if any (though rare in Jira)
     const blockLength = getBlockMatch(scanner, [parseTableBlock]);
     if (blockLength !== null) {
       scanner.pos += blockLength;

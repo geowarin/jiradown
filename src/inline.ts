@@ -2,7 +2,7 @@ import type { Image, Inline } from "./ast";
 import { parseParameters } from "./blocks";
 import { Scanner } from "./scanner";
 
-const PATTERNS = {
+export const PATTERNS = {
   STRONG: /^\*([^* \n\r][^*]*?[^* \n\r]|\S)\*/,
   EMPHASIS: /^_([^_ \n\r][^_]*?[^_ \n\r]|\S)_/,
   STRIKE: /^-(?!\s)([^- \n\r][^-]*?[^- \n\r]|\S)-(?!\w)/,
@@ -14,13 +14,22 @@ const PATTERNS = {
   COLOR: /^{color:([^}]+)}(.*?){color}/,
   ANCHOR: /^{anchor:([^}]+)}/,
   MENTION: /^\[~([^\]]+)\]/,
-  LINK: /^\[([^\]|]+)(?:\|([^\]]+))?\]/,
+  LINK: /^\[([^\]|]*)(?:\|([^\]]*))?\]/,
+  CHECKBOX: /^\[([ xX])\]/,
+  STATUS_ICON: /^\(([x/!iy n])\)/,
   IMAGE: /^!([^!| \t]+)(?:\|([^!]+))?!/,
   LINE_BREAK: /^\\\\/,
   DASHES_3: /^---/,
   DASHES_2: /^--/,
   DOMAIN: /^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}/,
 };
+
+export const PIPE_CONTAINING_INLINES = [
+  PATTERNS.LINK,
+  PATTERNS.IMAGE,
+  PATTERNS.CHECKBOX,
+  PATTERNS.MENTION,
+];
 
 export function parseInline(text: string): Inline[] {
   const scanner = new Scanner(text);
@@ -66,11 +75,14 @@ export function parseInline(text: string): Inline[] {
           result = parseCitation(scanner);
         }
         break;
+      case "(":
+        result = parseStatusIcon(scanner);
+        break;
       case "[":
         if (scanner.peek(2) === "[~") {
           result = parseMentionInline(scanner);
         } else {
-          result = parseLinkInline(scanner);
+          result = parseCheckbox(scanner) || parseLinkInline(scanner);
         }
         break;
       case "!":
@@ -177,18 +189,30 @@ function parseMentionInline(scanner: Scanner): Inline | null {
   return { type: "Mention", id: m[1] };
 }
 
+function parseCheckbox(scanner: Scanner): Inline | null {
+  const m = scanner.matchAndConsume(PATTERNS.CHECKBOX);
+  if (!m) return null;
+  return { type: "Checkbox", checked: m[1].toLowerCase() === "x" };
+}
+
+function parseStatusIcon(scanner: Scanner): Inline | null {
+  const m = scanner.matchAndConsume(PATTERNS.STATUS_ICON);
+  if (!m) return null;
+  return { type: "StatusIcon", icon: m[0] };
+}
+
 function parseLinkInline(scanner: Scanner): Inline | null {
   const m = scanner.matchAndConsume(PATTERNS.LINK);
   if (!m) return null;
-  const part1 = m[1];
-  const part2 = m[2];
+  const part1 = (m[1] || "").trim();
+  const part2 = (m[2] || "").trim();
 
   if (part2) {
     if (part2.startsWith("mailto:")) {
       return {
         type: "Link",
         text: parseInline(part1),
-        url: `mailto:${part2.slice(7)}`,
+        url: `mailto:${part2.slice(7).trim()}`,
       };
     }
     return { type: "Link", text: parseInline(part1), url: part2 };
@@ -206,7 +230,7 @@ function parseLinkInline(scanner: Scanner): Inline | null {
     };
   }
   if (part1.startsWith("mailto:")) {
-    return { type: "Link", url: part1.slice(7) };
+    return { type: "Link", url: part1.slice(7).trim() };
   }
   if (
     part1.startsWith("http") ||

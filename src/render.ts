@@ -53,24 +53,17 @@ function renderBlock(b: Block): string {
 function renderInline(n: Inline): string {
   switch (n.type) {
     case "Text": {
-      let value = n.value
+      return n.value
         .replace(/\\/g, "\\\\")
         .replace(/\*/g, "\\*")
         .replace(/_/g, "\\_")
-        .replace(/\[/g, "\\[")
-        .replace(/\]/g, "\\]")
+        .replace(/\[(?![ xX]\])/g, "\\[")
+        .replace(/(?<!\[[ xX])\]/g, "\\]")
         .replace(/~/g, "\\~")
         .replace(/\^/g, "\\^")
         .replace(/`/g, "\\`")
-        .replace(/</g, "&lt;");
-
-      // Only encode > if it's not preceded by - or = (part of an arrow)
-      // and not at the start of a line (where it would be a blockquote)
-      // Actually, standard Markdown only needs > encoded at the start of a line.
-      // But let's be safe and only encode it if it's not an arrow.
-      value = value.replace(/(?<![-=])>/g, "&gt;");
-
-      return value;
+        .replace(/</g, "&lt;")
+        .replace(/(?<![-=])>/g, "&gt;");
     }
     case "Strong":
       return `**${renderInlines(n.children)}**`;
@@ -127,6 +120,20 @@ function renderInline(n: Inline): string {
       let id = n.id;
       if (id.toLowerCase().startsWith("accountid:")) id = id.slice(10);
       return `@${id}`;
+    }
+    case "Checkbox":
+      return n.checked ? "[x]" : "[ ]";
+    case "StatusIcon": {
+      const mapping: Record<string, string> = {
+        "(/)": "✅",
+        "(x)": "❌",
+        "(!)": "⚠️",
+        "(i)": "ℹ️",
+        "(y)": "👍",
+        "(n)": "👎",
+        "( )": "⚪",
+      };
+      return mapping[n.icon] || n.icon;
     }
     default:
       return "";
@@ -231,9 +238,10 @@ export function renderInlines(nodes: Inline[]): string {
 
 function renderList(list: List, depth: number): string {
   const lines: string[] = [];
-  const marker = list.ordered ? "1. " : "- ";
 
-  for (const item of list.items) {
+  for (let index = 0; index < list.items.length; index++) {
+    const item = list.items[index];
+    const marker = list.ordered ? `${index + 1}. ` : "- ";
     const renderedItem = item.children
       .map((c) => {
         if (c.type === "List") {

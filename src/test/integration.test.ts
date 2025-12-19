@@ -15,12 +15,12 @@ Please ensure that all tests pass before merging.
 {panel}
 
 h3. Requirements
-* Implement OAuth2 flow
+* [ ] Implement OAuth2 flow
 * Add unit tests for:
-** Login
-** Logout
-** Token refresh
-* Documentation update
+** [x] Login
+** [x] Logout
+** [ ] Token refresh
+* [ ] Documentation update
 
 h3. Technical Details
 {code:javascript}
@@ -52,12 +52,12 @@ Cheers,
 
       ### Requirements
 
-      - Implement OAuth2 flow
+      - [ ] Implement OAuth2 flow
       - Add unit tests for:
-        - Login
-        - Logout
-        - Token refresh
-      - Documentation update
+        - [x] Login
+        - [x] Logout
+        - [ ] Token refresh
+      - [ ] Documentation update
 
       ### Technical Details
 
@@ -69,9 +69,9 @@ Cheers,
 
       |Task|Priority|Status|
       |---|---|---|
-      |Backend|High|(/) Done|
-      |Frontend|Medium|(x) Pending|
-      |QA|Low|(!) To Do|
+      |Backend|High|✅ Done|
+      |Frontend|Medium|❌ Pending|
+      |QA|Low|⚠️ To Do|
 
       Cheers,
 

@@ -46,4 +46,12 @@ export class Scanner {
     }
     return null;
   }
+
+  matchAny(regexes: RegExp[]): RegExpMatchArray | null {
+    for (const regex of regexes) {
+      const m = this.match(regex);
+      if (m && m.index === 0) return m;
+    }
+    return null;
+  }
 }

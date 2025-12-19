@@ -24,8 +24,8 @@ describe("Lists", () => {
 # numbered
 # list`;
     expect(convert(jira).trim()).toBe(`1. a
-1. numbered
-1. list`);
+2. numbered
+3. list`);
   });
 
   it("converts mixed nested lists (*#)", () => {
@@ -38,8 +38,8 @@ describe("Lists", () => {
     const expected = `- a
 - bulleted
   1. with
-  1. nested
-  1. numbered
+  2. nested
+  3. numbered
 - list`;
     expect(convert(jira).trim()).toBe(expected);
   });
@@ -52,11 +52,11 @@ describe("Lists", () => {
 #* bullet
 # list`;
     const expected = `1. a
-1. numbered
+2. numbered
    - with
    - nested
    - bullet
-1. list`;
+3. list`;
     expect(convert(jira).trim()).toBe(expected);
   });
 
