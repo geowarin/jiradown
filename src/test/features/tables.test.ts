@@ -63,4 +63,34 @@ describe("Tables", () => {
     expect(markdown).toContain("|---|---|");
     expect(markdown).toContain("|**Subheader 1**|**Subheader 2**|");
   });
+
+  it("handles multi-line code blocks inside table cells", () => {
+    const jira = `|cell 1|{code}
+line 1
+line 2
+{code}|
+|cell 2|content|`;
+    const result = convert(jira);
+    console.log("[DEBUG_LOG] result:", result);
+    expect(result).toContain("|cell 1|<pre><code>line 1<br>line 2</code></pre>|");
+    expect(result).toContain("|cell 2|content|");
+  });
+
+  it("handles multi-line code blocks inside table cells (broken case)", () => {
+    const jira = `|cell 1| {code}
+{
+  "key": "value"
+}
+{code} | cell 2 |`;
+    const result = convert(jira);
+    console.log("[DEBUG_LOG] result (broken):", JSON.stringify(result));
+    expect(result).toContain("|cell 1|<pre><code>{<br>  \"key\": \"value\"<br>}</code></pre>|cell 2|");
+  });
+
+  it("handles tab characters between table separators", () => {
+    const jira = "||header 1||\tHeader 2\t||Header 3|| Header 4 ||\n|cell 1|\tcell 2\t||cell 3| cell 4 |";
+    const result = convert(jira);
+    expect(result).toContain("|header 1|Header 2|Header 3|Header 4|");
+    expect(result).toContain("|cell 1|cell 2|**cell 3**|cell 4|");
+  });
 });

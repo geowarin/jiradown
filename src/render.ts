@@ -52,8 +52,8 @@ function renderBlock(b: Block): string {
 
 function renderInline(n: Inline): string {
   switch (n.type) {
-    case "Text":
-      return n.value
+    case "Text": {
+      let value = n.value
         .replace(/\\/g, "\\\\")
         .replace(/\*/g, "\\*")
         .replace(/_/g, "\\_")
@@ -62,8 +62,16 @@ function renderInline(n: Inline): string {
         .replace(/~/g, "\\~")
         .replace(/\^/g, "\\^")
         .replace(/`/g, "\\`")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/</g, "&lt;");
+
+      // Only encode > if it's not preceded by - or = (part of an arrow)
+      // and not at the start of a line (where it would be a blockquote)
+      // Actually, standard Markdown only needs > encoded at the start of a line.
+      // But let's be safe and only encode it if it's not an arrow.
+      value = value.replace(/(?<![-=])>/g, "&gt;");
+
+      return value;
+    }
     case "Strong":
       return `**${renderInlines(n.children)}**`;
     case "Strike":

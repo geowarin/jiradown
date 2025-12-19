@@ -59,4 +59,9 @@ describe("Links and Mentions", () => {
     const markdown = convert(jira);
     expect(markdown).toContain("[~user1][~user2]");
   });
+
+  it("handles complex links found in integration tests", () => {
+    const jira = "[JIRA TASK|https://jira.example.com/browse/TASK-1234]";
+    expect(convert(jira)).toBe("[JIRA TASK](https://jira.example.com/browse/TASK-1234)");
+  });
 });

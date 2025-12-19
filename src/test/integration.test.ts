@@ -67,11 +67,15 @@ Cheers,
       }
       \`\`\`
 
-      |Task|Priority|Status||
-      |---|---|---|---|
-      |Backend|High|(/) Done||
-      |Frontend|Medium|(x) Pending||
-      |QA|Low|(!) To Do|Cheers,<br>@12345|"
+      |Task|Priority|Status|
+      |---|---|---|
+      |Backend|High|(/) Done|
+      |Frontend|Medium|(x) Pending|
+      |QA|Low|(!) To Do|
+
+      Cheers,
+
+      @12345"
     `);
   });
 });

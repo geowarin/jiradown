@@ -27,8 +27,10 @@ const PATTERNS = {
   NEWLINE: /^\r?\n/,
 };
 
+type BlockParser = (scanner: Scanner) => Block | null;
+
 // Ordered list of block parsers
-const parsers = [
+const parsers: BlockParser[] = [
   parseHeading,
   parseHorizontalRule,
   parseBlockquotePrefix,
@@ -87,11 +89,14 @@ export function parseParameters(paramStr: string): Record<string, string> {
   return params;
 }
 
-function getBlockMatch(scanner: Scanner): number | null {
+function getBlockMatch(
+  scanner: Scanner,
+  excludeParsers: BlockParser[] = [],
+): number | null {
   const savedPos = scanner.pos;
   try {
     for (const parser of parsers) {
-      if (parser === parseListBlock) continue;
+      if (parser === parseListBlock || excludeParsers.includes(parser)) continue;
       if (parser(scanner)) {
         return scanner.pos - savedPos;
       }
@@ -231,7 +236,7 @@ function parseListBlock(scanner: Scanner): List | null {
 }
 
 function parseTableBlock(scanner: Scanner): Table | null {
-  if (!scanner.match(/^\|[|]/) && !scanner.match(/^\|/)) return null;
+  if (!scanner.match(/^[ \t]*\|[|]/) && !scanner.match(/^[ \t]*\|/)) return null;
   const table = parseTable(scanner);
   return table.rows.length > 0 ? table : null;
 }
@@ -276,7 +281,7 @@ function parseTable(scanner: Scanner): Table {
   const rows: TableRow[] = [];
   while (scanner.hasMore()) {
     const line = scanner.peekLine();
-    if (!line.startsWith("|")) break;
+    if (!line.trim().startsWith("|")) break;
 
     const fullRowLines = consumeTableRow(scanner);
     const cells: TableCell[] = [];
@@ -290,6 +295,7 @@ function parseTable(scanner: Scanner): Table {
     }
 
     while (remaining.length > 0) {
+      remaining = remaining.trimStart();
       if (remaining.startsWith("||")) {
         remaining = remaining.slice(2);
         const endIdx = findCellEnd(remaining);
@@ -315,17 +321,27 @@ function parseTable(scanner: Scanner): Table {
 }
 
 function consumeTableRow(scanner: Scanner): string {
-  let rowLines = "";
-  while (scanner.hasMore()) {
-    const currentLine = scanner.consumeLine();
-    rowLines += (rowLines ? "\n" : "") + currentLine;
+  const startPos = scanner.pos;
+  scanner.consumeLine(); // consume the first line which we know is a table row
 
+  while (scanner.hasMore()) {
     const nextLine = scanner.peekLine();
-    if (nextLine.trim().startsWith("|")) {
-      break;
-    }
+    const trimmed = nextLine.trim();
+
+    // Table rows must start with |
+    if (trimmed.startsWith("|")) break;
+    // Empty lines end the table
+    if (trimmed === "") break;
+
+    // These blocks also end the table
+    if (scanner.match(PATTERNS.HEADING)) break;
+    if (scanner.match(PATTERNS.HR)) break;
+    if (scanner.match(PATTERNS.LIST_START)) break;
+
+    // Otherwise, assume it's a continuation of the current row (multi-line cell)
+    scanner.consumeLine();
   }
-  return rowLines;
+  return scanner.input.slice(startPos, scanner.pos);
 }
 
 function addTableCell(cells: TableCell[], content: string, header: boolean) {
@@ -346,7 +362,7 @@ function findCellEnd(text: string): number {
       return scanner.pos;
     }
 
-    const blockLength = getBlockMatch(scanner);
+    const blockLength = getBlockMatch(scanner, [parseTableBlock]);
     if (blockLength !== null) {
       scanner.pos += blockLength;
       continue;

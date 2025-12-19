@@ -73,4 +73,10 @@ describe("Text Effects", () => {
   it("escapes special markdown characters in text that are not Jira markup", () => {
     expect(convert("Text with [link-like]")).toBe("Text with \\[link-like\\]");
   });
+
+  it("preserves arrows and doesn't over-encode '>'", () => {
+    expect(convert("-->")).toBe("-->");
+    expect(convert("->")).toBe("->");
+    expect(convert("=>")).toBe("=>");
+  });
 });

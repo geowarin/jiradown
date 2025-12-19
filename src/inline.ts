@@ -5,7 +5,7 @@ import { Scanner } from "./scanner";
 const PATTERNS = {
   STRONG: /^\*([^* \n\r][^*]*?[^* \n\r]|\S)\*/,
   EMPHASIS: /^_([^_ \n\r][^_]*?[^_ \n\r]|\S)_/,
-  STRIKE: /^-([^- \n\r][^-]*?[^- \n\r]|\S)-/,
+  STRIKE: /^-(?!\s)([^- \n\r][^-]*?[^- \n\r]|\S)-(?!\w)/,
   INSERTED: /^\+([^+ \n\r][^+]*?[^+ \n\r]|\S)\+/,
   SUP: /^\^([^^]+)\^/,
   SUB: /^~([^~]+)~/,
@@ -15,11 +15,11 @@ const PATTERNS = {
   ANCHOR: /^{anchor:([^}]+)}/,
   MENTION: /^\[~([^\]]+)\]/,
   LINK: /^\[([^\]|]+)(?:\|([^\]]+))?\]/,
-  IMAGE: /^!([^!|]+)(?:\|([^!]+))?!/,
+  IMAGE: /^!([^!| \t]+)(?:\|([^!]+))?!/,
   LINE_BREAK: /^\\\\/,
   DASHES_3: /^---/,
   DASHES_2: /^--/,
-  DOMAIN: /^[A-Z]+\.[A-Z]+\.[A-Z]+/,
+  DOMAIN: /^[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}/,
 };
 
 export function parseInline(text: string): Inline[] {
@@ -250,9 +250,17 @@ function parseLineBreak(scanner: Scanner): Inline | null {
 
 function parseDashes(scanner: Scanner): Inline | null {
   if (scanner.matchAndConsume(PATTERNS.DASHES_3)) {
+    // If followed by >, it's an arrow, not an em dash
+    if (scanner.peek() === ">") {
+      return { type: "Text", value: "---" };
+    }
     return { type: "Text", value: "—" };
   }
   if (scanner.matchAndConsume(PATTERNS.DASHES_2)) {
+    // If followed by >, it's an arrow, not an en dash
+    if (scanner.peek() === ">") {
+      return { type: "Text", value: "--" };
+    }
     return { type: "Text", value: "–" };
   }
   return null;

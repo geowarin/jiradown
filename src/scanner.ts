@@ -1,6 +1,6 @@
 export class Scanner {
   public pos = 0;
-  constructor(private input: string) {}
+  constructor(public input: string) {}
 
   peek(n = 1): string {
     return this.input.slice(this.pos, this.pos + n);
