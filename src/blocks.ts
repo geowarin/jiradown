@@ -40,22 +40,6 @@ const parsers = [
   parseTableBlock,
 ];
 
-function isStartOfNewBlock(scanner: Scanner): boolean {
-  const savedPos = scanner.pos;
-  try {
-    // We check all parsers except Paragraph (which is the default fallback)
-    for (const parser of parsers) {
-      if (parser === parseListBlock) continue;
-      if (parser(scanner)) {
-        return true;
-      }
-    }
-    return false;
-  } finally {
-    scanner.pos = savedPos;
-  }
-}
-
 export function parseBlocks(input: string): Document {
   const scanner = new Scanner(input);
   const blocks: Block[] = [];
@@ -84,6 +68,42 @@ export function parseBlocks(input: string): Document {
   }
 
   return doc(blocks);
+}
+
+export function parseParameters(paramStr: string): Record<string, string> {
+  const params: Record<string, string> = {};
+  if (!paramStr) return params;
+
+  const parts = paramStr.split("|");
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part.includes("=")) {
+      const [key, ...valueParts] = part.split("=");
+      params[key.trim()] = valueParts.join("=").trim();
+    } else if (i === 0) {
+      params.default = part.trim();
+    }
+  }
+  return params;
+}
+
+function getBlockMatch(scanner: Scanner): number | null {
+  const savedPos = scanner.pos;
+  try {
+    for (const parser of parsers) {
+      if (parser === parseListBlock) continue;
+      if (parser(scanner)) {
+        return scanner.pos - savedPos;
+      }
+    }
+    return null;
+  } finally {
+    scanner.pos = savedPos;
+  }
+}
+
+function isStartOfNewBlock(scanner: Scanner): boolean {
+  return getBlockMatch(scanner) !== null;
 }
 
 function parseHeading(scanner: Scanner): Heading | null {
@@ -155,23 +175,6 @@ function parsePanelBlock(scanner: Scanner): Block | null {
     title,
     children: parseBlocks(content).children,
   };
-}
-
-export function parseParameters(paramStr: string): Record<string, string> {
-  const params: Record<string, string> = {};
-  if (!paramStr) return params;
-
-  const parts = paramStr.split("|");
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (part.includes("=")) {
-      const [key, ...valueParts] = part.split("=");
-      params[key.trim()] = valueParts.join("=").trim();
-    } else if (i === 0) {
-      params.default = part.trim();
-    }
-  }
-  return params;
 }
 
 function parseListBlock(scanner: Scanner): List | null {
@@ -330,21 +333,19 @@ function addTableCell(cells: TableCell[], content: string, header: boolean) {
 }
 
 function findCellEnd(text: string): number {
-  let pos = 0;
-  while (pos < text.length) {
-    if (text.startsWith("||", pos) || text.startsWith("|", pos)) {
-      return pos;
+  const scanner = new Scanner(text);
+  while (scanner.hasMore()) {
+    if (scanner.peek(2) === "||" || scanner.peek(1) === "|") {
+      return scanner.pos;
     }
-    // Skip blocks
-    const remaining = text.slice(pos);
-    const blockMatch = remaining.match(
-      /^{(?:code(?::\w+)?|noformat|panel(?::title=[^}]+)?|quote)}[\s\S]*?{(?:code|noformat|panel|quote)}/,
-    );
-    if (blockMatch) {
-      pos += blockMatch[0].length;
+
+    const blockLength = getBlockMatch(scanner);
+    if (blockLength !== null) {
+      scanner.pos += blockLength;
       continue;
     }
-    pos++;
+
+    scanner.consume();
   }
-  return pos;
+  return scanner.pos;
 }
