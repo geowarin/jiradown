@@ -12,7 +12,7 @@ importers:
         specifier: 2.3.10
         version: 2.3.10
       '@types/node':
-        specifier: 24.x.x
+        specifier: ~24.0.0
         version: 24.0.15
       '@vitest/coverage-v8':
         specifier: ^4.0.16
