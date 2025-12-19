@@ -78,16 +78,16 @@ console.log(markdownText);
 
 ## Links
 
-| Jira                          | Markdown                   |
-|-------------------------------|----------------------------|
-| `[#bottomless-pit]`           | Not converted              |
-| `[^hope.jpg]`                 | `[hope.jpg](hope.jpg)`     |
-| `[http://google.it]`          | `<http://google.it>`       |
-| `[Fix it                      | http://stackoverflow.com]` | `[Fix it](http://stackoverflow.com)`   |
-| `[panic@company.com]`         | `<panic@company.com>`      |
-| `[file:///dev/null]`          | Not converted              |
-| `{anchor:point-of-no-return}` | Not converted              |
-| `[~intern]`                   | `@intern`                  |
+| Jira                                 | Markdown                             |
+|--------------------------------------|--------------------------------------|
+| `[#bottomless-pit]`                  | Not converted                        |
+| `[^hope.jpg]`                        | `[hope.jpg](hope.jpg)`               |
+| `[http://google.it]`                 | `<http://google.it>`                 |
+| `[Fix it](http://stackoverflow.com)` | `[Fix it](http://stackoverflow.com)` |
+| `[panic@company.com]`                | `<panic@company.com>`                |
+| `[file:///dev/null]`                 | Not converted                        |
+| `{anchor:point-of-no-return}`        | Not converted                        |
+| `[~intern]`                          | `@intern`                            |
 
 ## Lists
 
