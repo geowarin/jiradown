@@ -16,7 +16,7 @@ export const PATTERNS = {
   MENTION: /^\[~([^\]]+)\]/,
   LINK: /^\[([^\]|]*)(?:\|([^\]]*))?\]/,
   CHECKBOX: /^\[([ xX])\]/,
-  STATUS_ICON: /^\(([x/!iy n])\)/,
+  STATUS_ICON: /^\(([x/!iy n?+-])\)/,
   IMAGE: /^!([^!| \t]+)(?:\|([^!]+))?!/,
   LINE_BREAK: /^\\\\/,
   DASHES_3: /^---/,

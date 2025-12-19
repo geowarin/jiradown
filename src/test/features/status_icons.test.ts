@@ -3,8 +3,8 @@ import { convert } from "@/convert.ts";
 
 describe("Status Icons", () => {
   it("should convert all supported Jira status icons to emojis", () => {
-    const jira = "(/) (x) (!) (i) (y) (n) ( )";
-    const expected = "✅ ❌ ⚠️ ℹ️ 👍 👎 ⚪";
+    const jira = "(/) (x) (!) (i) (y) (n) ( ) (?) (+) (-)";
+    const expected = "✅ ❌ ⚠️ ℹ️ 👍 👎 ⚪ ❓ ➕ ➖";
     expect(convert(jira).trim()).toBe(expected);
   });
 

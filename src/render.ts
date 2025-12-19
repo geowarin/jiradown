@@ -132,6 +132,9 @@ function renderInline(n: Inline): string {
         "(y)": "👍",
         "(n)": "👎",
         "( )": "⚪",
+        "(?)": "❓",
+        "(+)": "➕",
+        "(-)": "➖",
       };
       return mapping[n.icon] || n.icon;
     }
