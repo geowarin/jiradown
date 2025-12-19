@@ -1,7 +1,7 @@
-import { defineConfig } from 'tsdown'
+import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/convert.ts'],
+  entry: { 'jiradown': 'src/convert.ts' },
   format: ['esm'],
   dts: true,
   clean: true,

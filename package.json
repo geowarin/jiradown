@@ -4,11 +4,11 @@
   "description": "TypeScript port of jiradown parser (Parsimmon-based)",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/convert.mjs",
-  "module": "./dist/convert.mjs",
-  "types": "./dist/convert.d.mts",
+  "main": "./dist/jiradown.mjs",
+  "module": "./dist/jiradown.mjs",
+  "types": "./dist/jiradown.d.mts",
   "exports": {
-    ".": "./dist/convert.mjs",
+    ".": "./dist/jiradown.mjs",
     "./package.json": "./package.json"
   },
   "packageManager": "pnpm@10.0.0",
