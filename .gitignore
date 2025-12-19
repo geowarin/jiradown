@@ -1,0 +1,7 @@
+# IDE
+.idea/*
+!.idea/watcherTasks.xml
+
+dist/
+node_modules/
+.output.txt
