@@ -11,7 +11,7 @@
     ".": "./dist/convert.mjs",
     "./package.json": "./package.json"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "build": "tsdown",
     "test": "vitest run",
