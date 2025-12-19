@@ -2,6 +2,9 @@
 
 `jiradown` is a TypeScript library that converts [Jira markup](https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all) to [Markdown](https://commonmark.org/).
 
+> [!WARNING]
+> This repository was mostly vibe coded. If you're looking for a more mature solution, check out [jira2markdown](https://github.com/catcombo/jira2markdown) which served as a great inspiration for this project.
+
 It follows a standard compiler-like architecture:
 1.  **Parser**: Converts input Jira markup into an Abstract Syntax Tree (AST).
 2.  **AST**: Defines the structure of the document, distinguishing between Block nodes (e.g., Heading, List, Table) and Inline nodes (e.g., Strong, Link, Image).
@@ -14,315 +17,106 @@ The Markdown implementation follows the [CommonMark specification](https://spec.
 ```typescript
 import { convert } from 'jiradown';
 
-const jiraText = 'h1. Hello World\n\nThis is *strong* text.';
+const jiraText = `h1. My Jira Nightmare
+{quote}
+"Can we just make the logo 20% more 'organic'?"
+{quote}
+* [ ] Crying in the shower
+* [ ] Refactoring the *vibe*
+* [!] Questioning my life choices`;
+
 const markdownText = convert(jiraText);
 
 console.log(markdownText);
-// # Hello World
-//
-// This is **strong** text.
+/*
+# My Jira Nightmare
+
+> "Can we just make the logo 20% more 'organic'?"
+
+- [ ] Crying in the shower
+- [ ] Refactoring the **vibe**
+- [!] Questioning my life choices
+*/
 ```
 
 # Conversion tables
 
 ## Headings
 
-| Jira                   | Markdown                  |
-|------------------------|---------------------------|
-| `h1. Biggest heading`  | `# Biggest heading`       |
-| `h2. Bigger heading`   | `## Bigger heading`       |
-| `h3. Big heading`      | `### Big heading`         |
-| `h4. Normal heading`   | `#### Normal heading`     |
-| `h5. Small heading`    | `##### Small heading`     |
-| `h6. Smallest heading` | `###### Smallest heading` |
+| Jira                      | Markdown                  |
+|---------------------------|---------------------------|
+| `h1. Total meltdown`      | `# Total meltdown`        |
+| `h2. Major crisis`        | `## Major crisis`         |
+| `h3. Minor inconvenience` | `### Minor inconvenience` |
+| `h4. Casual shrug`        | `#### Casual shrug`       |
+| `h5. Whispering`          | `##### Whispering`        |
+| `h6. Silent screaming`    | `###### Silent screaming` |
 
 ## Text Effects
 
-| Jira                                 | Markdown                             |
-|--------------------------------------|--------------------------------------|
-| `*strong*`                           | `**strong**`                         |
-| `_emphasis_`                         | Not converted (the same syntax)      |
-| `??citation??`                       | `<q>citation</q>`                    |
-| `-deleted-`                          | `~~deleted~~`                        |
-| `+inserted+`                         | `inserted`                           |
-| `^superscript^`                      | `<sup>superscript</sup>`             |
-| `~subscript~`                        | `<sub>subscript</sub>`               |
-| `{{monospaced}}`                     | `` `monospaced` ``                   |
-| `bq. Some block quoted text`         | `> Some block quoted text`           |
-| `{quote}Content to be quoted{quote}` | `> Content to be quoted`             |
-| `{color:red}red text!{color}`        | `<font color="red">red text!</font>` |
+| Jira                                          | Markdown                               |
+|-----------------------------------------------|----------------------------------------|
+| `*extra strong vibe*`                         | `**extra strong vibe**`                |
+| `_subtle hints_`                              | Not converted (the same syntax)        |
+| `??citation needed??`                         | `<q>citation needed</q>`               |
+| `-deprecated sanity-`                         | `~~deprecated sanity~~`                |
+| `+improved excuses+`                          | `improved excuses`                     |
+| `^highly optimistic^`                         | `<sup>highly optimistic</sup>`         |
+| `~crushing reality~`                          | `<sub>crushing reality</sub>`          |
+| `{{brain.exe}}`                               | `` `brain.exe` ``                      |
+| `bq. "It works on my machine"`                | `> "It works on my machine"`           |
+| `{quote}I have no idea what I'm doing{quote}` | `> I have no idea what I'm doing`      |
+| `{color:red}danger zone{color}`               | `<font color="red">danger zone</font>` |
 
 ## Text Breaks
 
-| Jira  | Markdown   |
-|-------|------------|
-| `\\`  | Line break |
-| `---` | `—`        |
-| `--`  | `–`        |
+| Jira           | Markdown      |
+|----------------|---------------|
+| `\\`           | Line break    |
+| `---`          | `—`           |
+| `--`           | `–`           |
 
 ## Links
 
-| Jira                            | Markdown                           |
-|---------------------------------|------------------------------------|
-| `[#anchor]`                     | Not converted                      |
-| `[^attachment.ext]`             | `[attachment.ext](attachment.ext)` |
-| `[http://www.example.com]`      | `<http://www.example.com>`         |
-| `[Example\|http://example.com]` | `[Example](http://example.com)`    |
-| `[mailto:box@example.com]`      | `<box@example.com>`                |
-| `[file:///c:/temp/foo.txt]`     | Not converted                      |
-| `{anchor:anchorname}`           | Not converted                      |
-| `[~username]`                   | `@username`                        |
+| Jira                          | Markdown                   |
+|-------------------------------|----------------------------|
+| `[#bottomless-pit]`           | Not converted              |
+| `[^hope.jpg]`                 | `[hope.jpg](hope.jpg)`     |
+| `[http://google.it]`          | `<http://google.it>`       |
+| `[Fix it                      | http://stackoverflow.com]` | `[Fix it](http://stackoverflow.com)`   |
+| `[panic@company.com]`         | `<panic@company.com>`      |
+| `[file:///dev/null]`          | Not converted              |
+| `{anchor:point-of-no-return}` | Not converted              |
+| `[~intern]`                   | `@intern`                  |
 
 ## Lists
 
-<table>
-<tr>
-<th>Jira</th>
-<th>Markdown</th>
-</tr>
-<tr>
-<td>
-
-```
-* some
-* bullet
-** indented
-** bullets
-* points
-```
-
-</td>
-<td>
-
-```
-- some
-- bullet
-  - indented
-  - bullets
-- points
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-# a
-# numbered
-# list
-```
-
-</td>
-<td>
-
-```
-1. a
-1. numbered
-1. list
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-# a
-# numbered
-#* with
-#* nested
-#* bullet
-# list
-```
-
-</td>
-<td>
-
-```
-1. a
-1. numbered
-   - with
-   - nested
-   - bullet
-1. list
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-* a
-* bulleted
-*# with
-*# nested
-*# numbered
-* list
-```
-
-</td>
-<td>
-
-```
-- a
-- bulleted
-  1. with
-  1. nested
-  1. numbered
-- list
-```
-
-</td>
-</tr>
-</table>
+| Jira                                                                                   | Markdown                                                                                 |
+|----------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| <pre>* coffee<br>* more coffee<br>** espresso<br>** double espresso<br>* regrets</pre> | <pre>- coffee<br>- more coffee<br>  - espresso<br>  - double espresso<br>- regrets</pre> |
+| <pre># Step 1: Open Jira<br># Step 2: Cry<br># Step 3: Profit?</pre>                   | <pre>1. Step 1: Open Jira<br>1. Step 2: Cry<br>1. Step 3: Profit?</pre>                  |
+| <pre># Tasks<br>#* Wake up<br>#* Coffee<br>#* Back to sleep<br># Repeat</pre>          | <pre>1. Tasks<br>   - Wake up<br>   - Coffee<br>   - Back to sleep<br>1. Repeat</pre>    |
 
 ## Images
 
-<table>
-<tr>
-<th>Jira</th>
-<th>Markdown</th>
-</tr>
-<tr>
-<td>
-
-```
-!image.jpg!
-!image.jpg|thumbnail!
-!image.gif|align=right, vspace=4!
-```
-
-</td>
-<td>
-
-```
-![image.jpg](image.jpg)
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-!image.jpg|width=300, height=200!
-```
-
-</td>
-<td>
-
-```
-![image.jpg](image.jpg){width=300 height=200}
-```
-
-</td>
-</tr>
-</table>
+| Jira                                                                                     | Markdown                                                           |
+|------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| <pre>!burnout.jpg!<br>!facepalm.jpg\|thumbnail!<br>!this-is-fine.gif\|align=right!</pre> | <pre>![burnout.jpg](burnout.jpg)</pre>                             |
+| <pre>!productivity.png\|width=0, height=0!</pre>                                         | <pre>![productivity.png](productivity.png){width=0 height=0}</pre> |
 
 ## Tables
 
-<table>
-<tr>
-<th>Jira</th>
-<th>Markdown</th>
-</tr>
-<tr>
-<td>
-
-```
-||heading 1||heading 2||heading 3||
-|col A1|col A2|col A3|
-|col B1|col B2|col B3|
-
-```
-
-</td>
-<td>
-
-```
-|heading 1|heading 2|heading 3|
-|---|---|---|
-|col A1|col A2|col A3|
-|col B1|col B2|col B3|
-```
-
-</td>
-</tr>
-</table>
+| Jira                                                                                                                               | Markdown                                                                                                                                |
+|------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| <pre>\|\|Feature\|\|Status\|\|Owner\|\|<br>\|Dark mode\|\|Essential\|\|The Intern\|<br>\|Fixing bugs\|\|Optional\|\|Nobody\|</pre> | <pre>\|Feature\|Status\|Owner\|<br>\|---\|---\|---\|<br>\|Dark mode\|Essential\|The Intern\|<br>\|Fixing bugs\|Optional\|Nobody\|</pre> |
 
 ## Advanced Formatting
 
-<table>
-<tr>
-<th>Jira</th>
-<th>Markdown</th>
-</tr>
-<tr>
-<td>
-
-```
-{noformat}
-preformatted piece of text
- so *no* further _formatting_ is done here
-{noformat}
-```
-
-</td>
-<td>
-
-````
-```
-preformatted piece of text
- so *no* further _formatting_ is done here
-```
-````
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-{panel:title=My Title}
-Some text with a title
-{panel}
-```
-
-</td>
-<td>
-
-```
-> **My Title**
-> Some text with a title
-```
-
-</td>
-</tr>
-<tr>
-<td>
-
-```
-{code:xml}
-    <test>
-        <another tag="attribute"/>
-    </test>
-{code}
-```
-
-</td>
-<td>
-
-```xml
-    <test>
-        <another tag="attribute"/>
-    </test>
-```
-
-</td>
-</tr>
-</table>
+| Jira                                                                                                  | Markdown                                                                                       |
+|-------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| <pre>{noformat}<br>This is where I put<br>my unfiltered thoughts<br>{noformat}</pre>                  | <pre>```<br>This is where I put<br>my unfiltered thoughts<br>```</pre>                         |
+| <pre>{panel:title=Urgent Alert}<br>The vibes are off.<br>{panel}</pre>                                | <pre>> **Urgent Alert**<br>> The vibes are off.</pre>                                          |
+| <pre>{code:typescript}<br>const mood = 'coding';<br>while (mood) {<br>  panic();<br>}<br>{code}</pre> | <pre>```typescript<br>const mood = 'coding';<br>while (mood) {<br>  panic();<br>}<br>```</pre> |
 
 ## Nesting rules
 
