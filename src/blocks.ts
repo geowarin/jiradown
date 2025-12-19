@@ -106,6 +106,13 @@ function isStartOfNewBlock(scanner: Scanner): boolean {
   return getBlockMatch(scanner) !== null;
 }
 
+/**
+ * Strips at most one newline from the beginning and end of a string.
+ */
+function stripSurroundingNewlines(text: string): string {
+  return text.replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+}
+
 function parseHeading(scanner: Scanner): Heading | null {
   const m = scanner.matchAndConsume(PATTERNS.HEADING);
   if (!m) return null;
@@ -144,7 +151,7 @@ function parseQuoteBlock(scanner: Scanner): Block | null {
 function parseNoFormatBlock(scanner: Scanner): Block | null {
   const m = scanner.matchAndConsume(PATTERNS.NOFORMAT);
   if (!m) return null;
-  const content = m[2].replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+  const content = stripSurroundingNewlines(m[2]);
   return {
     type: "NoFormat",
     content,
@@ -157,7 +164,7 @@ function parseCodeBlock(scanner: Scanner): Block | null {
   if (!m) return null;
   const params = parseParameters(m[1] || "");
   const lang = params.default;
-  const content = m[2].replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+  const content = stripSurroundingNewlines(m[2]);
   return { type: "CodeFence", lang, content };
 }
 
@@ -169,7 +176,7 @@ function parsePanelBlock(scanner: Scanner): Block | null {
   if (params.title) {
     title = parseInline(params.title);
   }
-  const content = m[2].replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+  const content = stripSurroundingNewlines(m[2]);
   return {
     type: "Panel",
     title,
